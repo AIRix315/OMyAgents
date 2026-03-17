@@ -97,19 +97,38 @@ class SOPEngine {
     async executeStage(instanceId, stage, context) {
         console.log(`[V9] 执行Stage: ${stage.stage_id}`);
         
+        // 确定stage类型
+        let stageType = 'action';
+        if (stage.decision_gate) stageType = 'decision_gate';
+        if (stage.sub_sop) stageType = 'sub_sop';
+        
+        // 创建Stage执行记录
+        const stageExecutionId = this.stateManager.createStageExecution(
+            instanceId, stage.stage_id, stageType
+        );
+        
         // 记录Stage开始
         this.stateManager.logEvent(instanceId, 'info', 'stage_start', 
             `Stage ${stage.stage_id} 开始`);
         
         try {
+            let result;
             if (stage.decision_gate) {
-                return await this.executeDecisionGate(instanceId, stage, context);
+                result = await this.executeDecisionGate(instanceId, stage, context);
             } else if (stage.sub_sop) {
-                return await this.executeSubSOP(instanceId, stage, context);
+                result = await this.executeSubSOP(instanceId, stage, context);
             } else {
-                return await this.executeAction(instanceId, stage, context);
+                result = await this.executeAction(instanceId, stage, context);
             }
+            
+            // 更新Stage为完成状态
+            this.stateManager.updateStageExecution(stageExecutionId, 'completed', result);
+            
+            return result;
         } catch (error) {
+            // 更新Stage为失败状态
+            this.stateManager.updateStageExecution(stageExecutionId, 'failed', { error: error.message });
+            
             this.stateManager.logEvent(instanceId, 'error', 'stage_failed',
                 `Stage ${stage.stage_id} 失败: ${error.message}`);
             throw error;

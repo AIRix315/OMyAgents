@@ -8,8 +8,57 @@ class SOPStateManager {
         this.db = db;
     }
 
-    // 创建SOP实例
+    // 创建Stage执行记录
+    createStageExecution(instanceId, stageId, stageType) {
+        const id = `stage_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+        const now = Date.now();
+        
+        const stmt = this.db.prepare(`
+            INSERT INTO stage_executions (id, instance_id, stage_id, stage_type, status, started_at)
+            VALUES (?, ?, ?, ?, 'pending', ?)
+        `);
+        stmt.run(id, instanceId, stageId, stageType, now);
+        
+        return id;
+    }
+
+    // 更新Stage执行状态
+    updateStageExecution(stageId, status, output = null) {
+        const stmt = this.db.prepare(`
+            UPDATE stage_executions 
+            SET status = ?, output_json = ?, completed_at = ?
+            WHERE id = ?
+        `);
+        stmt.run(status, output ? JSON.stringify(output) : null, Date.now(), stageId);
+    }
+
+    // 删除实例及其所有关联数据（注意外键顺序）
+    deleteInstance(instanceId) {
+        // 先删除子表数据
+        this.db.prepare('DELETE FROM parallel_stage_groups WHERE instance_id = ?').run(instanceId);
+        this.db.prepare('DELETE FROM human_decisions WHERE instance_id = ?').run(instanceId);
+        this.db.prepare('DELETE FROM stage_executions WHERE instance_id = ?').run(instanceId);
+        this.db.prepare('DELETE FROM execution_logs WHERE instance_id = ?').run(instanceId);
+        // 最后删除主表
+        this.db.prepare('DELETE FROM sop_instances WHERE id = ?').run(instanceId);
+    }
+
+    // 创建SOP实例（增强版：检查sop_definitions存在性）
     createInstance(sopId, initialContext = {}, parentId = null, recursionDepth = 0) {
+        // 检查sop_definitions是否存在，不存在则创建占位符
+        const checkStmt = this.db.prepare('SELECT id FROM sop_definitions WHERE id = ?');
+        const existing = checkStmt.get(sopId);
+        
+        if (!existing) {
+            // 自动创建sop_definitions占位符记录
+            const now = Date.now();
+            const insertDef = this.db.prepare(`
+                INSERT INTO sop_definitions (id, name, yaml_content, parsed_json, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `);
+            insertDef.run(sopId, sopId, '', '{}', now, now);
+        }
+        
         const id = `sop_inst_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         const now = Date.now();
         
