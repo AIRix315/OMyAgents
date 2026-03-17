@@ -156,7 +156,7 @@ async function shutdown() {
     try {
         console.log('[OMyAgents] 正在关闭...');
         
-        // TODO: 关闭数据库连接
+        // 不关闭数据库连接（复用KnowledgeBaseManager的实例）
         // TODO: 关闭事件监听
         
         console.log('[OMyAgents] 已关闭');
@@ -165,15 +165,22 @@ async function shutdown() {
     }
 }
 
-// 内部函数占位符 (各阶段实现)
+// 内部函数实现
 async function initializeDatabase() {
-    // 阶段二实现
-    console.log('[OMyAgents] 数据库初始化占位符');
+    // 通过dependencies获取数据库实例（VCP模式）
+    if (knowledgeBaseManager && knowledgeBaseManager.db) {
+        db = knowledgeBaseManager.db;
+        console.log('[OMyAgents] 数据库实例已从KnowledgeBaseManager获取');
+    } else {
+        console.warn('[OMyAgents] 警告：未获取到数据库实例，某些功能可能不可用');
+    }
 }
 
 async function initializeEventListeners() {
-    // 阶段七实现
-    console.log('[OMyAgents] 事件监听初始化占位符');
+    // TODO: 阶段七实现 - 使用chokidar监听DailyNote
+    if (debugMode) {
+        console.log('[OMyAgents] 事件监听初始化占位符');
+    }
 }
 
 module.exports = {
