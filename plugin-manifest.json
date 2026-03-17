@@ -1,0 +1,86 @@
+{
+  "manifestVersion": "1.0.0",
+  "name": "OMyAgents",
+  "displayName": "OMyAgents SOP 编排器",
+  "version": "1.0.0",
+  "description": "基于SOP的Agent编排系统，支持决策门、递归调用和事件驱动",
+  "author": "OMyAgents Team",
+  "pluginType": "service",
+  "entryPoint": {
+    "script": "index.js"
+  },
+  "communication": {
+    "protocol": "direct"
+  },
+  "hasApiRoutes": true,
+  "configSchema": {
+    "SOP_MAX_RECURSION_DEPTH": {
+      "type": "integer",
+      "description": "SOP最大递归深度",
+      "default": 3
+    },
+    "SOP_MAX_STAGE_COUNT": {
+      "type": "integer",
+      "description": "单个SOP最大Stage数",
+      "default": 20
+    },
+    "SOP_MAX_CONCURRENT_STAGES": {
+      "type": "integer",
+      "description": "最大并发Stage数",
+      "default": 10
+    },
+    "SOP_CONTEXT_SIZE_LIMIT": {
+      "type": "integer",
+      "description": "上下文大小限制(字节)",
+      "default": 10485760
+    },
+    "SOP_DECISION_TIMEOUT": {
+      "type": "string",
+      "description": "人工决策默认超时时间",
+      "default": "24h"
+    },
+    "V9_DATABASE_PATH": {
+      "type": "string",
+      "description": "SQLite数据库路径",
+      "default": "./Plugin/OMyAgents/data/sop_state.sqlite"
+    },
+    "V9_SOP_DEFINITIONS_PATH": {
+      "type": "string",
+      "description": "SOP定义YAML文件目录",
+      "default": "./Plugin/OMyAgents/sop-definitions"
+    },
+    "CRON_TASKS_BASE_URL": {
+      "type": "string",
+      "description": "CronTaskOrchestrator API基础URL",
+      "default": "http://localhost:5890"
+    },
+    "VCP_KEY": {
+      "type": "string",
+      "description": "VCP认证密钥"
+    },
+    "DebugMode": {
+      "type": "boolean",
+      "description": "调试模式",
+      "default": false
+    }
+  },
+  "capabilities": {
+    "invocationCommands": [
+      {
+        "commandIdentifier": "ExecuteSOP",
+        "description": "执行指定SOP流程。参数: sop_id(必需), initial_context(可选JSON对象)",
+        "example": "<<<[TOOL_REQUEST]>>>\ntool_name:\"始\"OMyAgents\"末\",\ncommand:\"始\"ExecuteSOP\"末\",\nsop_id:\"始\"news_analysis_pipeline\"末\",\ninitial_context:\"始\"{\"source\": \"daily_news\"}\"末\"\n<<<[END_TOOL_REQUEST]>>>"
+      },
+      {
+        "commandIdentifier": "GetSOPStatus",
+        "description": "查询SOP执行状态。参数: instance_id(必需)",
+        "example": "<<<[TOOL_REQUEST]>>>\ntool_name:\"始\"OMyAgents\"末\",\ncommand:\"始\"GetSOPStatus\"末\",\ninstance_id:\"始\"sop_inst_xxx\"末\"\n<<<[END_TOOL_REQUEST]>>>"
+      },
+      {
+        "commandIdentifier": "ListAvailableRoles",
+        "description": "列出可用的Agent角色定义",
+        "example": "<<<[TOOL_REQUEST]>>>\ntool_name:\"始\"OMyAgents\"末\",\ncommand:\"始\"ListAvailableRoles\"末\"\n<<<[END_TOOL_REQUEST]>>>"
+      }
+    ]
+  }
+}
