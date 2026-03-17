@@ -1,0 +1,56 @@
+# 新闻分析流程示例
+# 参考V9战略文档附录场景
+
+sop_id: news_analysis_pipeline
+version: 1
+name: 新闻分析流程
+description: A搜集→B汇编→C评估→A再搜集的循环
+
+stages:
+  - stage_id: compile
+    role: NewsCompiler
+    action: compile_new_entries
+    timeout: 30000
+    
+  - stage_id: evaluate
+    role: ValueAnalyzer
+    action: evaluate_news_value
+    timeout: 60000
+    
+  - stage_id: value_decision
+    decision_gate:
+      mode: agent_evaluate
+      evaluator_role: ValueAnalyzer
+      branches:
+        - condition: "has_high_value && recursion_depth < 3"
+          sub_sop:
+            sop_id: deep_dive_research
+            inherit_context: true
+            
+        - condition: "has_high_value && max_depth_reached"
+          decision_gate:
+            mode: human_decision
+            timeout: "24h"
+            options: [approve, request_expansion, reject]
+            
+        - condition: "no_high_value"
+          next_stage: archive
+          
+  - stage_id: archive
+    role: NewsArchiver
+    action: archive_report
+
+sub_sops:
+  - sop_id: deep_dive_research
+    stages:
+      - stage_id: expand_search
+        role: SearchExpander
+        action: search_related_topics
+        parallel: true
+        max_parallel: 3
+        timeout: 120000
+        
+      - stage_id: reanalyze
+        role: ValueAnalyzer
+        action: integrate_and_reanalyze
+        timeout: 60000

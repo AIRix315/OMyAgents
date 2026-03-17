@@ -1,0 +1,26 @@
+{
+  "name": "omyagents-v9",
+  "version": "1.0.0",
+  "description": "OMyAgents V9 SOP编排器 - 基于SOP的Agent编排系统",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vcp",
+    "plugin",
+    "sop",
+    "agent",
+    "orchestration"
+  ],
+  "author": "OMyAgents Team",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "ajv": "^8.12.0",
+    "json-logic-js": "^2.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
