@@ -1,4 +1,4 @@
-# OMyAgents V9
+# OMyAgents
 
 <div align="center">
 
@@ -7,6 +7,8 @@
 [![Tests](https://img.shields.io/badge/tests-20%2F20%20passing-brightgreen)]()
 
 **基于SOP的Agent编排系统 | SOP-based Agent Orchestration System**
+
+**Version**: V9 (Strategic Release)
 
 [中文](#中文) | [English](#english)
 
