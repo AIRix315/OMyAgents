@@ -171,6 +171,11 @@ async function initializeDatabase() {
     if (knowledgeBaseManager && knowledgeBaseManager.db) {
         db = knowledgeBaseManager.db;
         console.log('[OMyAgents] 数据库实例已从KnowledgeBaseManager获取');
+        
+        // 初始化OMyAgents表结构
+        const SchemaManager = require('./src/database/schema');
+        const schema = new SchemaManager(db);
+        schema.initialize();
     } else {
         console.warn('[OMyAgents] 警告：未获取到数据库实例，某些功能可能不可用');
     }
