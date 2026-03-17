@@ -16,9 +16,11 @@
   "author": "OMyAgents Team",
   "license": "MIT",
   "dependencies": {
-    "js-yaml": "^4.1.0",
     "ajv": "^8.12.0",
-    "json-logic-js": "^2.0.2"
+    "better-sqlite3": "^12.8.0",
+    "js-yaml": "^4.1.0",
+    "json-logic-js": "^2.0.2",
+    "node-fetch": "^3.3.2"
   },
   "engines": {
     "node": ">=16.0.0"
